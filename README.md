@@ -1,6 +1,8 @@
 # Random Screenshot
 A RuneLite plugin that takes random screenshots as you go about your adventures.
 
+You can find your randomly taken screenshots under the `Random Screenshots` folder in your RuneLite Screenshots folder.
+
 Feel free to suggest improvements/features on this repository's issues page, or submit a pull request!
 
 ## Configuration
