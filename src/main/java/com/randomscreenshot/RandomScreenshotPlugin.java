@@ -14,18 +14,20 @@ import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
 	name = "Random Screenshot",
 	description = "Randomly take screenshots as you go about your adventures",
-	tags = {"screenshot", "images", "random"}
+	tags = {"screenshot", "images", "random", "memories"}
 )
 @Slf4j
 public class RandomScreenshotPlugin extends Plugin
 {
+	static final String CONFIG_GROUP_KEY = "randomscreenshot";
+
 	@Inject
 	private RandomScreenshotConfig config;
 
 	@Inject
 	private ScreenShotUtil screenShotUtil;
 
-	private Random rand = new Random(0);
+	private final Random rand = new Random(System.currentTimeMillis());
 
 
 	@Provides
@@ -35,7 +37,7 @@ public class RandomScreenshotPlugin extends Plugin
 	}
 
 	@Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
 		SCREENSHOT_DIR.mkdirs();
 	}
@@ -43,9 +45,9 @@ public class RandomScreenshotPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		if (rand.nextInt(1000) > 900)
+		if (rand.nextInt(config.sampleWeight()) == 0)
 		{
-			screenShotUtil.takeScreenshot("", null);
+			screenShotUtil.takeScreenshot("", "Random Screenshots");
 		}
 	}
 }
