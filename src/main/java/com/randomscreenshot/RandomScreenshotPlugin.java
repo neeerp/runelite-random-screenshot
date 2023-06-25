@@ -45,9 +45,17 @@ public class RandomScreenshotPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		if (rand.nextInt(config.sampleWeight()) == 0)
+		if (shouldTakeScreenshot())
 		{
-			screenShotUtil.takeScreenshot("", "Random Screenshots");
+			takeScreenshot();
 		}
+	}
+
+	private boolean shouldTakeScreenshot() {
+		return rand.nextInt(config.sampleWeight()) == 0;
+	}
+
+	private void takeScreenshot() {
+		screenShotUtil.takeScreenshot("", "Random Screenshots");
 	}
 }
