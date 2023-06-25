@@ -25,7 +25,7 @@ public class RandomScreenshotPlugin extends Plugin
 	private RandomScreenshotConfig config;
 
 	@Inject
-	private ScreenShotUtil screenShotUtil;
+	private ScreenshotUtil screenShotUtil;
 
 	private final Random rand = new Random(System.currentTimeMillis());
 

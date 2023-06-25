@@ -38,7 +38,7 @@ import net.runelite.client.util.ImageUploadStyle;
 import net.runelite.client.util.ImageUtil;
 
 @Singleton
-public class ScreenShotUtil
+public class ScreenshotUtil
 {
 
 	@Inject
