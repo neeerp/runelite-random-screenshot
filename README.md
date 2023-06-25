@@ -28,3 +28,6 @@ For convenience, here's a table with the number of ticks in a given interval of 
 ## Attributions
 ### Core Screenshot Plugin
 This was built atop of the core Screenshot plugin, which was lifted and stripped down in `ScreenshotUtil.java`.
+
+### Plugin Icon
+<a href="https://www.flaticon.com/free-icons/ui" title="ui icons">Ui icons created by mim_studio - Flaticon</a>
