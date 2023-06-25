@@ -32,29 +32,6 @@ import net.runelite.client.util.ImageUploadStyle;
 @ConfigGroup("screenshot")
 public interface RandomScreenshotConfig extends Config
 {
-
-	@ConfigItem(
-		keyName = "includeFrame",
-		name = "Include Client Frame",
-		description = "Configures whether or not the client frame is included in screenshots",
-		position = 0
-	)
-	default boolean includeFrame()
-	{
-		return true;
-	}
-
-	@ConfigItem(
-		keyName = "displayDate",
-		name = "Display Date",
-		description = "Configures whether or not the report button shows the date the screenshot was taken",
-		position = 1
-	)
-	default boolean displayDate()
-	{
-		return true;
-	}
-
 	@ConfigItem(
 		keyName = "uploadScreenshot",
 		name = "Upload",

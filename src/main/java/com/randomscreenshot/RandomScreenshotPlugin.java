@@ -27,23 +27,18 @@ package com.randomscreenshot;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import javax.inject.Inject;
-import javax.swing.SwingUtilities;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.Point;
 import net.runelite.api.SpriteID;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.WidgetID;
@@ -58,7 +53,6 @@ import net.runelite.client.ui.DrawManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.OSType;
 
 @PluginDescriptor(
 	name = "Screenshot",
@@ -68,11 +62,6 @@ import net.runelite.client.util.OSType;
 @Slf4j
 public class RandomScreenshotPlugin extends Plugin
 {
-	private static final Set<Integer> REPORT_BUTTON_TLIS = ImmutableSet.of(
-		WidgetID.FIXED_VIEWPORT_GROUP_ID,
-		WidgetID.RESIZABLE_VIEWPORT_OLD_SCHOOL_BOX_GROUP_ID,
-		WidgetID.RESIZABLE_VIEWPORT_BOTTOM_LINE_GROUP_ID);
-
 	@Inject
 	private RandomScreenshotConfig config;
 
@@ -84,9 +73,6 @@ public class RandomScreenshotPlugin extends Plugin
 
 	@Inject
 	private Client client;
-
-	@Inject
-	private ClientUI clientUi;
 
 	@Inject
 	private DrawManager drawManager;
@@ -130,12 +116,9 @@ public class RandomScreenshotPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		String screenshotSubDir = null;
-		String fileName = "foo";
-
 		if (rand.nextInt(1000) > 900)
 		{
-			takeScreenshot(fileName, screenshotSubDir);
+			takeScreenshot("", null);
 		}
 	}
 
@@ -162,67 +145,11 @@ public class RandomScreenshotPlugin extends Plugin
 			executor.submit(() -> takeScreenshot(fileName, subDir, img));
 		};
 
-		if (config.displayDate() && REPORT_BUTTON_TLIS.contains(client.getTopLevelInterfaceId()))
-		{
-			randomScreenshotOverlay.queueForTimestamp(imageCallback);
-		}
-		else
-		{
-			drawManager.requestNextFrameListener(imageCallback);
-		}
-	}
-
-	private static int getScaledValue(final double scale, final int value)
-	{
-		return (int) (value * scale + .5);
+		drawManager.requestNextFrameListener(imageCallback);
 	}
 
 	private void takeScreenshot(String fileName, String subDir, Image image)
 	{
-		final BufferedImage screenshot;
-		if (!config.includeFrame())
-		{
-			// just simply copy the image
-			screenshot = ImageUtil.bufferedImageFromImage(image);
-		}
-		else
-		{
-			// create a new image, paint the client ui to it, and then draw the screenshot to that
-			final AffineTransform transform = OSType.getOSType() == OSType.MacOS ? new AffineTransform() :
-				clientUi.getGraphicsConfiguration().getDefaultTransform();
-
-			// scaled client dimensions
-			int clientWidth = getScaledValue(transform.getScaleX(), clientUi.getWidth());
-			int clientHeight = getScaledValue(transform.getScaleY(), clientUi.getHeight());
-
-			screenshot = new BufferedImage(clientWidth, clientHeight, BufferedImage.TYPE_INT_ARGB);
-
-			Graphics2D graphics = (Graphics2D) screenshot.getGraphics();
-			AffineTransform originalTransform = graphics.getTransform();
-			// scale g2d for the paint() call
-			graphics.setTransform(transform);
-
-			// Draw the client frame onto the screenshot
-			try
-			{
-				SwingUtilities.invokeAndWait(() -> clientUi.paint(graphics));
-			}
-			catch (InterruptedException | InvocationTargetException e)
-			{
-				log.warn("unable to paint client UI on screenshot", e);
-			}
-
-			// Find the position of the canvas inside the frame
-			final Point canvasOffset = clientUi.getCanvasOffset();
-			final int gameOffsetX = getScaledValue(transform.getScaleX(), canvasOffset.getX());
-			final int gameOffsetY = getScaledValue(transform.getScaleY(), canvasOffset.getY());
-
-			// Draw the original screenshot onto the new screenshot
-			graphics.setTransform(originalTransform); // the original screenshot is already scaled
-			graphics.drawImage(image, gameOffsetX, gameOffsetY, null);
-			graphics.dispose();
-		}
-
-		imageCapture.takeScreenshot(screenshot, fileName, subDir, false, config.uploadScreenshot());
+		imageCapture.takeScreenshot(ImageUtil.bufferedImageFromImage(image), fileName, subDir, false, config.uploadScreenshot());
 	}
 }
