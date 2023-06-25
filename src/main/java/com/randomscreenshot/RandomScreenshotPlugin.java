@@ -25,32 +25,22 @@
 package com.randomscreenshot;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import javax.inject.Inject;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.SpriteID;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.widgets.WidgetID;
 import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.DrawManager;
-import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.ImageUtil;
 
@@ -66,12 +56,6 @@ public class RandomScreenshotPlugin extends Plugin
 	private RandomScreenshotConfig config;
 
 	@Inject
-	private OverlayManager overlayManager;
-
-	@Inject
-	private RandomScreenshotOverlay randomScreenshotOverlay;
-
-	@Inject
 	private Client client;
 
 	@Inject
@@ -81,13 +65,7 @@ public class RandomScreenshotPlugin extends Plugin
 	private ScheduledExecutorService executor;
 
 	@Inject
-	private SpriteManager spriteManager;
-
-	@Inject
 	private ImageCapture imageCapture;
-
-	@Getter(AccessLevel.PACKAGE)
-	private BufferedImage reportButton;
 
 	private Random rand = new Random(0);
 
@@ -101,16 +79,12 @@ public class RandomScreenshotPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(randomScreenshotOverlay);
 		SCREENSHOT_DIR.mkdirs();
-
-		spriteManager.getSpriteAsync(SpriteID.CHATBOX_REPORT_BUTTON, 0, s -> reportButton = s);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		overlayManager.remove(randomScreenshotOverlay);
 	}
 
 	@Subscribe
@@ -134,8 +108,6 @@ public class RandomScreenshotPlugin extends Plugin
 	{
 		if (client.getGameState() == GameState.LOGIN_SCREEN)
 		{
-			// Prevent the screenshot from being captured
-			log.info("Login screenshot prevented");
 			return;
 		}
 
