@@ -5,7 +5,6 @@ import java.util.Random;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.events.GameTick;
-import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -34,12 +33,6 @@ public class RandomScreenshotPlugin extends Plugin
 	RandomScreenshotConfig getConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(RandomScreenshotConfig.class);
-	}
-
-	@Override
-	protected void startUp()
-	{
-		SCREENSHOT_DIR.mkdirs();
 	}
 
 	@Subscribe
