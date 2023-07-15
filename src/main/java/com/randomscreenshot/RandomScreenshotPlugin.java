@@ -4,7 +4,10 @@ import com.google.inject.Provides;
 import java.util.Random;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -26,6 +29,9 @@ public class RandomScreenshotPlugin extends Plugin
 	@Inject
 	private ScreenshotUtil screenShotUtil;
 
+	@Inject
+	private Client client;
+
 	private final Random rand = new Random(System.currentTimeMillis());
 
 
@@ -44,11 +50,22 @@ public class RandomScreenshotPlugin extends Plugin
 		}
 	}
 
+	/* TODO: Create a decider interface so that decision strategy can be made modular. */
 	private boolean shouldTakeScreenshot() {
-		return rand.nextInt(config.sampleWeight()) == 0;
+		return isBankPINContainerHidden() && rand.nextInt(config.sampleWeight()) == 0;
 	}
 
 	private void takeScreenshot() {
 		screenShotUtil.takeScreenshot("", "Random Screenshots");
+	}
+
+	private boolean isBankPINContainerHidden()
+	{
+		Widget pinContainer = client.getWidget(WidgetInfo.BANK_PIN_CONTAINER);
+		if (pinContainer == null) {
+			return true;
+		}
+
+		return pinContainer.isSelfHidden();
 	}
 }
