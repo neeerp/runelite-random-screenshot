@@ -7,7 +7,8 @@ Feel free to suggest improvements/features on this repository's issues page, or 
 
 ## Configuration
 Every game tick, there is a 1 in `n` chance that a screenshot is taken (with `n` configurable via the "Sample Weight"
-option). _This does not guarantee a screenshot will be taken every `n` ticks! It's random!_
+option). _This does not guarantee a screenshot will be taken every `n` ticks! It's random!_ Moreover, the roll to take a
+screenshot does not happen whenever the bank pin UI is open.
 
 For convenience, here's a table with the number of ticks in a given interval of real time.
 
