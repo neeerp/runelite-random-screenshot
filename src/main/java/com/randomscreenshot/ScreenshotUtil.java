@@ -125,11 +125,16 @@ public class ScreenshotUtil
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				log.warn("error uploading screenshot", e);
+				log.error("error uploading screenshot", e);
 			}
 
 			@Override
-			public void onResponse(Call call, Response response) throws IOException {}
+			public void onResponse(Call call, Response response) throws IOException {
+				if (!response.isSuccessful()) {
+					log.error("post to discord webhook was unsuccessful! HTTP Status: {}", response.code());
+				}
+				response.close();
+			}
 		});
 
 	}
