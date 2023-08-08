@@ -26,20 +26,36 @@
 package com.randomscreenshot;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.client.ui.DrawManager;
 import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.ImageUploadStyle;
 import net.runelite.client.util.ImageUtil;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Singleton
+@Slf4j
 public class ScreenshotUtil
 {
+	@Inject
+	private OkHttpClient okHttpClient;
 
 	@Inject
 	private Client client;
@@ -49,7 +65,10 @@ public class ScreenshotUtil
 	private ScheduledExecutorService executor;
 	@Inject
 	private ImageCapture imageCapture;
-	
+
+	@Inject
+	private RandomScreenshotConfig config;
+
 	/**
 	 * Saves a screenshot of the client window to the screenshot folder as a PNG,
 	 * and optionally uploads it to an image-hosting service.
@@ -72,9 +91,55 @@ public class ScreenshotUtil
 
 		drawManager.requestNextFrameListener(imageCallback);
 	}
-	
+
 	private void takeScreenshot(String fileName, String subDir, Image image)
 	{
-		imageCapture.takeScreenshot(ImageUtil.bufferedImageFromImage(image), fileName, subDir, false, ImageUploadStyle.NEITHER);
+		BufferedImage bufferedImage = ImageUtil.bufferedImageFromImage(image);
+
+		imageCapture.takeScreenshot(bufferedImage, fileName, subDir, false, ImageUploadStyle.NEITHER);
+
+		if (config.useDiscordWebhook()) {
+			postToDiscord(bufferedImage);
+		}
+	}
+
+	private void postToDiscord(BufferedImage image) {
+		try
+		{
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(image, "png", baos);
+
+			RequestBody body = new MultipartBody.Builder()
+				.setType(MultipartBody.FORM)
+				.addFormDataPart("image", "myfile.png", RequestBody.create(MediaType.parse("image/*png"), baos.toByteArray())).build();
+
+			Request request = new Request.Builder()
+				.url(config.discordWebhookUrl())
+				.post(body).build();
+
+			okHttpClient.newCall(request).enqueue(new Callback()
+			{
+				@Override
+				public void onFailure(Call call, IOException e)
+				{
+					log.error("error uploading screenshot", e);
+				}
+
+				@Override
+				public void onResponse(Call call, Response response) throws IOException
+				{
+					if (!response.isSuccessful())
+					{
+						log.error("post to discord webhook was unsuccessful! HTTP Status: {}", response.code());
+					}
+					response.close();
+				}
+			});
+		}
+		catch (IOException e)
+		{
+			log.error("failed to write image to output stream: ", e);
+			return;
+		}
 	}
 }

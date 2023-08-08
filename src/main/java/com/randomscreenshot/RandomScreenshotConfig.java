@@ -9,6 +9,7 @@ import net.runelite.client.config.Range;
 public interface RandomScreenshotConfig extends Config
 {
 	@ConfigItem(
+		position = 0,
 		keyName = "sampleWeight",
 		name = "Sample Weight",
 		description = "The average number of ticks until a screenshot is taken. A game tick occurs every 0.6 seconds, and there are 100 ticks in a minute."
@@ -16,5 +17,27 @@ public interface RandomScreenshotConfig extends Config
 	@Range(min = 1)
 	default int sampleWeight() {
 		return 500;
+	}
+
+	@ConfigItem(
+		position = 1,
+		keyName = "useDiscordWebhook",
+		name = "Post to Discord Webhook",
+		description = "Send screenshots to a Discord Webhook"
+	)
+	default boolean useDiscordWebhook() {
+		return false;
+	}
+
+	// TODO: Is there a better way to get text input? Would be nice to have a 'confirm' button and a way to validate
+	//  the webhook.
+	@ConfigItem(
+		position = 2,
+		keyName = "discordWebhookUrl",
+		name = "Discord Webhook URL",
+		description = "A Discord Webhook URL to post screenshots to as they're taken"
+	)
+	default String discordWebhookUrl() {
+		return "";
 	}
 }
