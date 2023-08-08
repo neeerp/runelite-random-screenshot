@@ -104,38 +104,42 @@ public class ScreenshotUtil
 	}
 
 	private void postToDiscord(BufferedImage image) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		try {
+		try
+		{
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(image, "png", baos);
-		} catch (IOException e) {
+
+			RequestBody body = new MultipartBody.Builder()
+				.setType(MultipartBody.FORM)
+				.addFormDataPart("image", "myfile.png", RequestBody.create(MediaType.parse("image/*png"), baos.toByteArray())).build();
+
+			Request request = new Request.Builder()
+				.url(config.discordWebhookUrl())
+				.post(body).build();
+
+			okHttpClient.newCall(request).enqueue(new Callback()
+			{
+				@Override
+				public void onFailure(Call call, IOException e)
+				{
+					log.error("error uploading screenshot", e);
+				}
+
+				@Override
+				public void onResponse(Call call, Response response) throws IOException
+				{
+					if (!response.isSuccessful())
+					{
+						log.error("post to discord webhook was unsuccessful! HTTP Status: {}", response.code());
+					}
+					response.close();
+				}
+			});
+		}
+		catch (IOException e)
+		{
 			log.error("failed to write image to output stream: ", e);
 			return;
 		}
-
-		RequestBody body = new MultipartBody.Builder()
-			.setType(MultipartBody.FORM)
-			.addFormDataPart("image", "myfile.png", RequestBody.create(MediaType.parse("image/*png"), baos.toByteArray())).build();
-
-		okHttpClient.newCall(new Request.Builder()
-			.url(config.discordWebhookUrl())
-			.post(body).build()
-		).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException e)
-			{
-				log.error("error uploading screenshot", e);
-			}
-
-			@Override
-			public void onResponse(Call call, Response response) throws IOException {
-				if (!response.isSuccessful()) {
-					log.error("post to discord webhook was unsuccessful! HTTP Status: {}", response.code());
-				}
-				response.close();
-			}
-		});
-
 	}
 }
