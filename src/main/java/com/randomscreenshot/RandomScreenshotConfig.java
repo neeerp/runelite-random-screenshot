@@ -29,6 +29,8 @@ public interface RandomScreenshotConfig extends Config
 		return false;
 	}
 
+	// TODO: Is there a better way to get text input? Would be nice to have a 'confirm' button and a way to validate
+	//  the webhook.
 	@ConfigItem(
 		position = 2,
 		keyName = "discordWebhookUrl",
