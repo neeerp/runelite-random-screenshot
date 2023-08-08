@@ -26,16 +26,9 @@
 package com.randomscreenshot;
 
 import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import javax.imageio.ImageIO;
@@ -72,7 +65,10 @@ public class ScreenshotUtil
 	private ScheduledExecutorService executor;
 	@Inject
 	private ImageCapture imageCapture;
-	
+
+	@Inject
+	private RandomScreenshotConfig config;
+
 	/**
 	 * Saves a screenshot of the client window to the screenshot folder as a PNG,
 	 * and optionally uploads it to an image-hosting service.
@@ -102,24 +98,27 @@ public class ScreenshotUtil
 
 		imageCapture.takeScreenshot(bufferedImage, fileName, subDir, false, ImageUploadStyle.NEITHER);
 
+		if (config.useDiscordWebhook()) {
+			postToDiscord(bufferedImage);
+		}
+	}
+
+	private void postToDiscord(BufferedImage image) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try
-		{
-			ImageIO.write(bufferedImage, "png", baos);
+
+		try {
+			ImageIO.write(image, "png", baos);
+		} catch (IOException e) {
+			log.error("failed to write image to output stream: ", e);
+			return;
 		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-		byte[] bytes = baos.toByteArray();
 
 		RequestBody body = new MultipartBody.Builder()
 			.setType(MultipartBody.FORM)
 			.addFormDataPart("image", "myfile.png", RequestBody.create(MediaType.parse("image/*png"), baos.toByteArray())).build();
-		String WEBHOOK_URL = "https://discord.com/api/webhooks/1137860087361314857/hA5WklDxVrkIlJm9rYZmTnZuRcY4QawIUFyqAGrdfyYHo3dNEX7Jf45sC6anMc8qJKVf";
 
 		okHttpClient.newCall(new Request.Builder()
-			.url(WEBHOOK_URL)
+			.url(config.discordWebhookUrl())
 			.post(body).build()
 		).enqueue(new Callback()
 		{
