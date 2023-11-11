@@ -61,7 +61,7 @@ public class RandomScreenshotPlugin extends Plugin
 	}
 
 	private void takeScreenshot() {
-		screenShotUtil.takeScreenshot(config.screenshotDirectory());
+		screenShotUtil.takeScreenshot();
 	}
 
 	private boolean isBankPinContainerVisible()

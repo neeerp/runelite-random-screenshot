@@ -53,25 +53,25 @@ public class ScreenshotUtil
 	@Inject
 	private FileFactory fileFactory;
 	
-	public void takeScreenshot(String directory)
+	public void takeScreenshot()
 	{
 		Consumer<Image> imageCallback = (img) ->
 		{
 			// This callback is on the game thread, move to executor thread
-			executor.submit(() -> saveScreenshot(img, directory));
+			executor.submit(() -> saveScreenshot(img));
 		};
 
 		drawManager.requestNextFrameListener(imageCallback);
 	}
 
-	private void saveScreenshot(Image image, String directory)
+	private void saveScreenshot(Image image)
 	{
 		BufferedImage screenshot = ImageUtil.bufferedImageFromImage(image);
 
 		File screenshotFile;
 		try
 		{
-			screenshotFile = fileFactory.createScreenshotFile(directory);
+			screenshotFile = fileFactory.createScreenshotFile();
 			ImageIO.write(screenshot, "PNG", screenshotFile);
 		}
 		catch (IOException ex)

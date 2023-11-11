@@ -21,8 +21,11 @@ public class FileFactory
 	@Inject
 	private Client client;
 
-	public File createScreenshotFile(String directory) throws IOException {
-		File screenshotDirectory = createScreenshotDirectory(directory);
+	@Inject
+	private RandomScreenshotConfig config;
+
+	public File createScreenshotFile() throws IOException {
+		File screenshotDirectory = createScreenshotDirectory();
 		String fileName = format(new Date());
 
 		File screenshotFile = new File(screenshotDirectory, fileName + ".png");
@@ -44,16 +47,19 @@ public class FileFactory
 	 *
 	 * If path is an empty string, the player profile directory is used instead.
 	 */
-	public File createScreenshotDirectory(String path) throws IOException {
+	public File createScreenshotDirectory() throws IOException {
 		File screenshotDirectory;
-		if (!path.isEmpty()) {
-			screenshotDirectory = new File(path);
+		if (config.useCustomDirectory())
+		{
+			screenshotDirectory = new File(config.screenshotDirectory());
 		}
-		else {
+		else
+		{
 			screenshotDirectory = getPlayerScreenshotDirectory();
 		}
 
-		if (!screenshotDirectory.mkdirs() && !screenshotDirectory.exists()) {
+		if (!screenshotDirectory.mkdirs() && !screenshotDirectory.exists())
+		{
 			throw new IOException("Could not create screenshot directory at " + screenshotDirectory.getAbsolutePath());
 		}
 
