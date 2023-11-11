@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -52,20 +53,28 @@ public class RandomScreenshotPlugin extends Plugin
 
 	/* TODO: Create a decider interface so that decision strategy can be made modular. */
 	private boolean shouldTakeScreenshot() {
-		return isBankPINContainerHidden() && rand.nextInt(config.sampleWeight()) == 0;
+		if (isBankPinContainerVisible() || isOnLoginScreen()) {
+			return false;
+		}
+
+		return rand.nextInt(config.sampleWeight()) == 0;
 	}
 
 	private void takeScreenshot() {
 		screenShotUtil.takeScreenshot(config.screenshotDirectory());
 	}
 
-	private boolean isBankPINContainerHidden()
+	private boolean isBankPinContainerVisible()
 	{
 		Widget pinContainer = client.getWidget(WidgetInfo.BANK_PIN_CONTAINER);
 		if (pinContainer == null) {
 			return true;
 		}
 
-		return pinContainer.isSelfHidden();
+		return !pinContainer.isSelfHidden();
+	}
+
+	private boolean isOnLoginScreen() {
+		return client.getGameState() == GameState.LOGIN_SCREEN;
 	}
 }
