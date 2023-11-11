@@ -56,7 +56,7 @@ public class RandomScreenshotPlugin extends Plugin
 	}
 
 	private void takeScreenshot() {
-		screenShotUtil.takeScreenshot("", "Random Screenshots");
+		screenShotUtil.takeScreenshot(config.screenshotDirectory());
 	}
 
 	private boolean isBankPINContainerHidden()
