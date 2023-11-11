@@ -35,8 +35,6 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.ScreenshotTaken;
 import net.runelite.client.ui.DrawManager;
@@ -53,17 +51,10 @@ public class ScreenshotUtil
 	@Inject
 	private EventBus eventBus;
 	@Inject
-	private Client client;
-	@Inject
 	private FileFactory fileFactory;
 	
 	public void takeScreenshot(String directory)
 	{
-		if (client.getGameState() == GameState.LOGIN_SCREEN)
-		{
-			return;
-		}
-
 		Consumer<Image> imageCallback = (img) ->
 		{
 			// This callback is on the game thread, move to executor thread
