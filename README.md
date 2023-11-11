@@ -1,11 +1,13 @@
 # Random Screenshot
 A RuneLite plugin that takes random screenshots as you go about your adventures.
 
-You can find your randomly taken screenshots under the `Random Screenshots` folder in your RuneLite Screenshots folder.
+By default, you can find your randomly taken screenshots under the `Random Screenshots` folder in your RuneLite 
+Screenshots folder. You may also configure a custom folder to save your screenshots to. Note that if you sync your 
+RuneLite settings across multiple devices, your custom directory might not be valid on all of them!
 
 Feel free to suggest improvements/features on this repository's issues page, or submit a pull request!
 
-## Configuration
+## Screenshot Frequency
 Every game tick, there is a 1 in `n` chance that a screenshot is taken (with `n` configurable via the "Sample Weight"
 option). _This does not guarantee a screenshot will be taken every `n` ticks! It's random!_ Moreover, the roll to take a
 screenshot does not happen whenever the bank pin UI is open.
