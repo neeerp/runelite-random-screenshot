@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -66,7 +66,7 @@ public class RandomScreenshotPlugin extends Plugin
 
 	private boolean isBankPinContainerVisible()
 	{
-		Widget pinContainer = client.getWidget(WidgetInfo.BANK_PIN_CONTAINER);
+		Widget pinContainer = client.getWidget(ComponentID.BANK_PIN_CONTAINER);
 		if (pinContainer == null) {
 			return true;
 		}
