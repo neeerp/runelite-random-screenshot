@@ -33,8 +33,8 @@ public class RandomScreenshotPlugin extends Plugin
 	@Inject
 	private Client client;
 
-	private final Random rand = new Random(System.currentTimeMillis());
-
+	@Inject
+	private RandomUtil rand;
 
 	@Provides
 	RandomScreenshotConfig getConfig(ConfigManager configManager)
@@ -52,12 +52,12 @@ public class RandomScreenshotPlugin extends Plugin
 	}
 
 	/* TODO: Create a decider interface so that decision strategy can be made modular. */
-	private boolean shouldTakeScreenshot() {
+	boolean shouldTakeScreenshot() {
 		if (isBankPinContainerVisible() || isOnLoginScreen()) {
 			return false;
 		}
 
-		return rand.nextInt(config.sampleWeight()) == 0;
+		return rand.randInt(config.sampleWeight()) == 0;
 	}
 
 	private void takeScreenshot() {
