@@ -68,7 +68,7 @@ public class RandomScreenshotPlugin extends Plugin
 	{
 		Widget pinContainer = client.getWidget(ComponentID.BANK_PIN_CONTAINER);
 		if (pinContainer == null) {
-			return true;
+			return false;
 		}
 
 		return !pinContainer.isSelfHidden();
