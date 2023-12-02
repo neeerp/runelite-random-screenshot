@@ -3,6 +3,7 @@ package com.randomscreenshot;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.widgets.Widget;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ public class RandomScreenshotPluginTest
 	@Mock
 	RandomUtil rand;
 
+	@Mock
+	Widget widget;
+
 	@BeforeEach
 	void setup() {
 		Mockito.lenient().when(config.sampleWeight()).thenReturn(100);
@@ -43,7 +47,35 @@ public class RandomScreenshotPluginTest
 	@Test
 	public void testShouldTakeScreenshotIfBankPinContainerNull() {
 		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(null);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
+		Mockito.when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
+
 		Assertions.assertTrue(plugin.shouldTakeScreenshot());
 	}
+
+	@Test
+	public void testShouldTakeScreenshotIfBankPinContainerNotVisible() {
+		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(widget);
+		Mockito.when(widget.isSelfHidden()).thenReturn(true);
+		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
+
+		Assertions.assertTrue(plugin.shouldTakeScreenshot());
+	}
+
+	@Test
+	public void testShouldNotTakeScreenshotIfBankPinContainerVisible() {
+		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(widget);
+		Mockito.when(widget.isSelfHidden()).thenReturn(false);
+		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
+
+		Assertions.assertFalse(plugin.shouldTakeScreenshot());
+	}
+
+	@Test
+	public void testShouldNotTakeScreenshotIfOnLoginScreen() {
+		Mockito.when(client.getGameState()).thenReturn(GameState.LOGIN_SCREEN);
+		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
+
+		Assertions.assertFalse(plugin.shouldTakeScreenshot());
+	}
+
 }
