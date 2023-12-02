@@ -42,48 +42,35 @@ import net.runelite.client.util.ImageUtil;
 
 @Singleton
 @Slf4j
-public class ScreenshotUtil
-{
-	@Inject
-	private DrawManager drawManager;
-	@Inject
-	private ScheduledExecutorService executor;
-	@Inject
-	private EventBus eventBus;
-	@Inject
-	private FileFactory fileFactory;
-	
-	public void takeScreenshot()
-	{
-		Consumer<Image> imageCallback = (img) ->
-		{
-			// This callback is on the game thread, move to executor thread
-			executor.submit(() -> saveScreenshot(img));
-		};
+public class ScreenshotUtil {
+  @Inject private DrawManager drawManager;
+  @Inject private ScheduledExecutorService executor;
+  @Inject private EventBus eventBus;
+  @Inject private FileFactory fileFactory;
 
-		drawManager.requestNextFrameListener(imageCallback);
-	}
+  public void takeScreenshot() {
+    Consumer<Image> imageCallback =
+        (img) -> {
+          // This callback is on the game thread, move to executor thread
+          executor.submit(() -> saveScreenshot(img));
+        };
 
-	private void saveScreenshot(Image image)
-	{
-		BufferedImage screenshot = ImageUtil.bufferedImageFromImage(image);
+    drawManager.requestNextFrameListener(imageCallback);
+  }
 
-		File screenshotFile;
-		try
-		{
-			screenshotFile = fileFactory.createScreenshotFile();
-			ImageIO.write(screenshot, "PNG", screenshotFile);
-		}
-		catch (IOException ex)
-		{
-			log.error("error writing screenshot", ex);
-			return;
-		}
+  private void saveScreenshot(Image image) {
+    BufferedImage screenshot = ImageUtil.bufferedImageFromImage(image);
 
-		ScreenshotTaken screenshotTaken = new ScreenshotTaken(
-			screenshotFile,
-			screenshot
-		);
-		eventBus.post(screenshotTaken);
-	}
+    File screenshotFile;
+    try {
+      screenshotFile = fileFactory.createScreenshotFile();
+      ImageIO.write(screenshot, "PNG", screenshotFile);
+    } catch (IOException ex) {
+      log.error("error writing screenshot", ex);
+      return;
+    }
+
+    ScreenshotTaken screenshotTaken = new ScreenshotTaken(screenshotFile, screenshot);
+    eventBus.post(screenshotTaken);
+  }
 }
