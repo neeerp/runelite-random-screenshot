@@ -1,11 +1,6 @@
 package com.randomscreenshot;
 
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.widgets.ComponentID;
-import net.runelite.api.widgets.Widget;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,56 +21,27 @@ public class RandomScreenshotPluginTest
 	ScreenshotUtil screenshotUtil;
 
 	@Mock
-	RandomUtil rand;
+	ScreenshotStrategy screenshotStrategy;
 
-	@Mock
-	Widget widget;
-
-	@BeforeEach
-	void setup() {
-		Mockito.lenient().when(config.sampleWeight()).thenReturn(100);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(1);
-		Mockito.lenient().doNothing().when(screenshotUtil).takeScreenshot();
-
-		Mockito.lenient().when(client.getGameState()).thenReturn(GameState.LOGGED_IN);
-		Mockito.lenient().when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(null);
-	}
 
 	@InjectMocks
 	RandomScreenshotPlugin plugin = new RandomScreenshotPlugin();
 
-	@Test
-	public void testShouldTakeScreenshotIfBankPinContainerNull() {
-		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(null);
-		Mockito.when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
 
-		Assertions.assertTrue(plugin.shouldTakeScreenshot());
+	@Test
+	public void shouldTakeScreenshotWhenItShould() {
+		Mockito.when(screenshotStrategy.shouldTakeScreenshot()).thenReturn(true);
+
+		plugin.onGameTick();
+		Mockito.verify(screenshotUtil, Mockito.times(1)).takeScreenshot();
 	}
 
 	@Test
-	public void testShouldTakeScreenshotIfBankPinContainerNotVisible() {
-		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(widget);
-		Mockito.when(widget.isSelfHidden()).thenReturn(true);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
+	public void shouldNotTakeScreenshotWhenItShouldNot() {
+		Mockito.when(screenshotStrategy.shouldTakeScreenshot()).thenReturn(false);
 
-		Assertions.assertTrue(plugin.shouldTakeScreenshot());
-	}
-
-	@Test
-	public void testShouldNotTakeScreenshotIfBankPinContainerVisible() {
-		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(widget);
-		Mockito.when(widget.isSelfHidden()).thenReturn(false);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
-
-		Assertions.assertFalse(plugin.shouldTakeScreenshot());
-	}
-
-	@Test
-	public void testShouldNotTakeScreenshotIfOnLoginScreen() {
-		Mockito.when(client.getGameState()).thenReturn(GameState.LOGIN_SCREEN);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
-
-		Assertions.assertFalse(plugin.shouldTakeScreenshot());
+		plugin.onGameTick();
+		Mockito.verify(screenshotUtil, Mockito.times(0)).takeScreenshot();
 	}
 
 }
