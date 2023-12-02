@@ -3,6 +3,7 @@ package com.randomscreenshot;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -21,9 +22,9 @@ public class RandomScreenshotPlugin extends Plugin
 	@Inject
 	private ScreenshotUtil screenShotUtil;
 
-	// TODO: Instead of injection, this could be chosen dynamically via config.
+	// TODO: Ideally, this should be chosen via a configuration, and not rely on the concrete implementation.
 	@Inject
-	private ScreenshotStrategy screenshotStrategy;
+	private DefaultScreenshotStrategy screenshotStrategy;
 
 	@Provides
 	RandomScreenshotConfig getConfig(ConfigManager configManager)
@@ -32,7 +33,7 @@ public class RandomScreenshotPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameTick()
+	public void onGameTick(GameTick event)
 	{
 		if (screenshotStrategy.shouldTakeScreenshot())
 		{

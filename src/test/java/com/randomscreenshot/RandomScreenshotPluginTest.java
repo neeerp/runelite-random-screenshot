@@ -21,7 +21,7 @@ public class RandomScreenshotPluginTest
 	ScreenshotUtil screenshotUtil;
 
 	@Mock
-	ScreenshotStrategy screenshotStrategy;
+	DefaultScreenshotStrategy screenshotStrategy;
 
 
 	@InjectMocks
@@ -32,7 +32,7 @@ public class RandomScreenshotPluginTest
 	public void shouldTakeScreenshotWhenItShould() {
 		Mockito.when(screenshotStrategy.shouldTakeScreenshot()).thenReturn(true);
 
-		plugin.onGameTick();
+		plugin.onGameTick(null);
 		Mockito.verify(screenshotUtil, Mockito.times(1)).takeScreenshot();
 	}
 
@@ -40,7 +40,7 @@ public class RandomScreenshotPluginTest
 	public void shouldNotTakeScreenshotWhenItShouldNot() {
 		Mockito.when(screenshotStrategy.shouldTakeScreenshot()).thenReturn(false);
 
-		plugin.onGameTick();
+		plugin.onGameTick(null);
 		Mockito.verify(screenshotUtil, Mockito.times(0)).takeScreenshot();
 	}
 
