@@ -1,10 +1,6 @@
 package com.randomscreenshot;
 
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.widgets.ComponentID;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,25 +21,27 @@ public class RandomScreenshotPluginTest
 	ScreenshotUtil screenshotUtil;
 
 	@Mock
-	RandomUtil rand;
+	DefaultScreenshotStrategy screenshotStrategy;
 
-	@BeforeEach
-	void setup() {
-		Mockito.lenient().when(config.sampleWeight()).thenReturn(100);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(1);
-		Mockito.lenient().doNothing().when(screenshotUtil).takeScreenshot();
-
-		Mockito.lenient().when(client.getGameState()).thenReturn(GameState.LOGGED_IN);
-		Mockito.lenient().when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(null);
-	}
 
 	@InjectMocks
 	RandomScreenshotPlugin plugin = new RandomScreenshotPlugin();
 
+
 	@Test
-	public void testShouldTakeScreenshotIfBankPinContainerNull() {
-		Mockito.when(client.getWidget(Mockito.eq(ComponentID.BANK_PIN_CONTAINER))).thenReturn(null);
-		Mockito.lenient().when(rand.randInt(Mockito.any(Integer.class))).thenReturn(0);
-		Assertions.assertTrue(plugin.shouldTakeScreenshot());
+	public void shouldTakeScreenshotWhenItShould() {
+		Mockito.when(screenshotStrategy.shouldTakeScreenshot()).thenReturn(true);
+
+		plugin.onGameTick(null);
+		Mockito.verify(screenshotUtil, Mockito.times(1)).takeScreenshot();
 	}
+
+	@Test
+	public void shouldNotTakeScreenshotWhenItShouldNot() {
+		Mockito.when(screenshotStrategy.shouldTakeScreenshot()).thenReturn(false);
+
+		plugin.onGameTick(null);
+		Mockito.verify(screenshotUtil, Mockito.times(0)).takeScreenshot();
+	}
+
 }
